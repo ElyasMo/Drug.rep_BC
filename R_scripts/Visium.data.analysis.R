@@ -32,10 +32,10 @@ return(x)
 }
 
 
-dir1 <- "/mnt/data1/elyas/Single-cell/PD/New/Visium/CID4290/" 
-dir2 <- "/mnt/data1/elyas/Single-cell/PD/New/Visium/CID4465/" 
-dir3 <- "/mnt/data1/elyas/Single-cell/PD/New/Visium/CID44971/" 
-dir4 <- "/mnt/data1/elyas/Single-cell/PD/New/Visium/CID4535/" 
+dir1 <- "./Visium/CID4290/" 
+dir2 <- "./Visium/CID4465/" 
+dir3 <- "./Visium/CID44971/" 
+dir4 <- "./Visium/CID4535/" 
 
 CID4290 <- st.mtx(dir1,"CID4290")
 CID4465 <- st.mtx(dir2,"CID4465")
@@ -59,13 +59,9 @@ CID4535@images$CID4535@assay <- "Spatial"
 CID4535@images$CID4535@key <- "cid4535_"
 
 
-
 CID4290@images$CID4290@coordinates <- CID4290@images$CID4290@coordinates[na.omit(match(names(as.data.frame(CID4290@assays$Spatial@counts)),row.names(CID4290@images$CID4290@coordinates))),]
-
 CID4465@images$CID4465@coordinates <- CID4465@images$CID4465@coordinates[na.omit(match(names(as.data.frame(CID4465@assays$Spatial@counts)),row.names(CID4465@images$CID4465@coordinates))),]
-
 CID44971@images$CID44971@coordinates <- CID44971@images$CID44971@coordinates[na.omit(match(names(as.data.frame(CID44971@assays$Spatial@counts)),row.names(CID44971@images$CID44971@coordinates))),]
-
 CID4535@images$CID4535@coordinates <- CID4535@images$CID4535@coordinates[na.omit(match(names(as.data.frame(CID4535@assays$Spatial@counts)),row.names(CID4535@images$CID4535@coordinates))),]
 
 objects <- Reduce(merge,c(CID4290,CID4465,CID44971,CID4535))
@@ -78,15 +74,11 @@ saveRDS(objects,"./Visium/Objects.rds")
 objects <- readRDS("./Visium/Objects.rds")
  
 DimPlot(objects)+ggtitle("Distinguishment of  Visium profiles in patients")
-
 ```
 
-
-
 ```{r}
-
 # Loading the data from step 1
-path="/mnt/data1/elyas/Single-cell/PD/New/"
+path="./New/"
 setwd(path)
 load(file = "Inputs_step1.RData" )
 
@@ -94,16 +86,10 @@ BC <- SplitObject(BC, split.by = "Patient")
 BC <- Reduce(merge, c(BC$CID4290A, BC$CID4465,BC$CID44971,BC$CID4535))
 
 save(BC,St.Objects,file = "./Visium/Visium.set.Rdata")
-
 ```
-
-
-
 
 ```{r}
 load(file = "./Visium/Visium.set.Rdata")
-
-# BC <- SplitObject(BC,  split.by = "Patient")
 
 library(dplyr)
 
@@ -125,16 +111,14 @@ ST[["prediction.labels"]] <- SP1.predictions.assay1
 ST[["predictions"]] <- predictions.assay$predicted.id
 return(ST)
 }
-
 ```
 
 ```{r,fig.height=10}
 
 sc.ST.int.sct <- Label.transfer.sct(BC,St.Objects)
-
 sc.ST.int.sct$predictions <- factor(sc.ST.int.sct$predictions,levels = c("Cancer Epithelial","Normal Epithelial","Endothelial", "CAFs", "PVL",   "Plasmablasts", "Myeloid", "T-cells","B-cells" ))
 
-pdf("../New/PIC/Visium1.pdf", width=5, height=12)
+pdf("./Visium1.pdf", width=5, height=12)
 par(mar = c(6, 6, 6, 6));
 SpatialDimPlot(sc.ST.int.sct,group.by = "predictions",cols = c("Cancer Epithelial"="#E76BF3","Normal Epithelial"="#F8766D","Endothelial"="#00BF7D", "CAFs"="#00B0F6", "PVL"="#A3A500",   "Plasmablasts"="#D0DF07", "Myeloid"="#05E1E1", "T-cells"="#E5E591","B-cells"= "#AB32B4"),ncol = 1,pt.size.factor = 1.8)&guides(fill=guide_legend(title="Cell type"))&theme(legend.text = element_text(size = 12),legend.title = element_text(size=14))
 dev.off()
@@ -144,7 +128,6 @@ dev.off()
 saveRDS(sc.ST.int.sct,"./Visium/ST.list.final.rds")
 
 ```
-
 
 ```{r,fig.width=20}
 sc.ST.int.sct <- readRDS("./Visium/ST.list.final.rds")
@@ -208,7 +191,6 @@ P8 <- VlnPlot(sc.ST.int.sct,features = names(sc.ST.int.sct@meta.data)[19],group.
         legend.text = element_text(size=16))
 
 
-
 library(ggpubr)
 leg <- get_legend(P8)
 P8 <- as_ggplot(leg)
@@ -239,7 +221,6 @@ wilcox.test(as.data.frame(subset(sc.ST.int.sct@meta.data,predictions=="Cancer Ep
 wilcox.test(as.data.frame(subset(sc.ST.int.sct@meta.data,predictions=="Cancer Epithelial"))$HMGN27,
             as.data.frame(subset(sc.ST.int.sct@meta.data,predictions=="Normal Epithelial"))$HMGN27)
 ```
-
 
 ```{r}
 
@@ -294,5 +275,4 @@ p1 <- EnhancedVolcano(ST3.DEGS,
     xlim = c(-4,4),
     caption = NULL
 )+theme(legend.position = "none")
-
 ```
